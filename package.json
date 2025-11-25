@@ -1,5 +1,5 @@
 {
-  "name": "my-turborepo",
+  "name": "sanity-test-demo",
   "private": true,
   "scripts": {
     "build": "turbo run build",
