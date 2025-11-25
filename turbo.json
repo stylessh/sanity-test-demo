@@ -3,17 +3,20 @@
   "ui": "tui",
   "tasks": {
     "build": {
+      "env": ["NODE_ENV", "SANITY_API_TOKEN"],
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": [".next/**", "!.next/cache/**"]
     },
     "lint": {
+      "env": ["NODE_ENV", "SANITY_API_TOKEN"],
       "dependsOn": ["^lint"]
     },
     "check-types": {
       "dependsOn": ["^check-types"]
     },
     "dev": {
+      "env": ["NODE_ENV", "SANITY_API_TOKEN"],
       "cache": false,
       "persistent": true
     }
