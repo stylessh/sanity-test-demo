@@ -1,26 +1,34 @@
 import { createClient } from "next-sanity";
+import imageUrlBuilder from "@sanity/image-url";
+
+const isDevelopment = process.env.NODE_ENV === "development";
 
 export const client = createClient({
   projectId: "6xj7qolc",
   dataset: "production",
   apiVersion: "2024-01-01",
-  useCdn: process.env.NODE_ENV === "production",
+  useCdn: !isDevelopment,
+  perspective: isDevelopment ? "previewDrafts" : "published",
   token: process.env.SANITY_API_TOKEN,
 });
+
+const builder = imageUrlBuilder(client);
+
+export function urlFor(source: any) {
+  return builder.image(source);
+}
+
+export interface Section {
+  _type: string;
+  _key: string;
+  [key: string]: any;
+}
 
 export interface PageData {
   _id: string;
   title: string;
   slug: { current: string };
-  hero: {
-    title: string;
-    subtitle: string;
-    ctaGroup: {
-      type: string;
-      text: string;
-      href: string;
-    }[];
-  };
+  sections: Section[];
 }
 
 export async function fetchPageBySlug(slug: string): Promise<PageData | null> {
@@ -28,13 +36,24 @@ export async function fetchPageBySlug(slug: string): Promise<PageData | null> {
     _id,
     title,
     slug,
-    hero {
-      title,
-      subtitle,
-      ctaGroup[] {
-        text,
-        href,
-        type
+    sections[] {
+      _type,
+      _key,
+      ...,
+      image {
+        asset
+      },
+      features[] {
+        ...,
+        image {
+          asset
+        }
+      },
+      testimonials[] {
+        ...,
+        avatar {
+          asset
+        }
       }
     }
   }`;
