@@ -1,10 +1,27 @@
 import {defineField, defineType} from 'sanity'
 
-export const homepageType = defineType({
-  name: 'homepage',
-  title: 'Homepage',
+export const pageType = defineType({
+  name: 'page',
+  title: 'Page',
   type: 'document',
   fields: [
+    defineField({
+      name: 'title',
+      title: 'Page Title',
+      type: 'string',
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: 'slug',
+      title: 'Slug',
+      type: 'slug',
+      description: 'The URL path for this page. Use "/" for the homepage.',
+      options: {
+        source: 'title',
+        maxLength: 96,
+      },
+      validation: (rule) => rule.required(),
+    }),
     defineField({
       name: 'hero',
       title: 'Hero Section',
@@ -68,4 +85,16 @@ export const homepageType = defineType({
       ],
     }),
   ],
+  preview: {
+    select: {
+      title: 'title',
+      slug: 'slug.current',
+    },
+    prepare({title, slug}) {
+      return {
+        title: title,
+        subtitle: slug === '/' ? 'Homepage' : `/${slug}`,
+      }
+    },
+  },
 })

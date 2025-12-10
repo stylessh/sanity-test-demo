@@ -14,11 +14,17 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     // Sanity webhook payload structure
-    const { _type, _id } = body;
+    const { _type, _id, slug } = body;
 
-    // Handle different document types and revalidation
-    if (_type === "homepage") {
+    // Handle page type revalidation
+    if (_type === "page") {
+      // Always revalidate the homepage
       revalidatePath("/");
+
+      // If the page has a slug, revalidate that specific path
+      if (slug?.current && slug.current !== "/") {
+        revalidatePath(`/${slug.current}`);
+      }
     }
 
     if (_type === "post") {

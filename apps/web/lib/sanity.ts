@@ -4,12 +4,30 @@ export const client = createClient({
   projectId: "6xj7qolc",
   dataset: "production",
   apiVersion: "2024-01-01",
-  useCdn: process.env.NODE_ENV === "production", // Set to true for production for better performance
+  useCdn: process.env.NODE_ENV === "production",
   token: process.env.SANITY_API_TOKEN,
 });
 
-export async function fetchHomepage() {
-  const query = `*[_type == "homepage"][0]{
+export interface PageData {
+  _id: string;
+  title: string;
+  slug: { current: string };
+  hero: {
+    title: string;
+    subtitle: string;
+    ctaGroup: {
+      type: string;
+      text: string;
+      href: string;
+    }[];
+  };
+}
+
+export async function fetchPageBySlug(slug: string): Promise<PageData | null> {
+  const query = `*[_type == "page" && slug.current == $slug][0]{
+    _id,
+    title,
+    slug,
     hero {
       title,
       subtitle,
@@ -19,6 +37,16 @@ export async function fetchHomepage() {
         type
       }
     }
+  }`;
+
+  return await client.fetch(query, { slug });
+}
+
+export async function fetchAllPageSlugs(): Promise<
+  { slug: { current: string } }[]
+> {
+  const query = `*[_type == "page"]{
+    slug
   }`;
 
   return await client.fetch(query);

@@ -1,9 +1,25 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { fetchPageBySlug } from "@/lib/sanity";
+import { fetchPageBySlug, fetchAllPageSlugs } from "@/lib/sanity";
 
-export default async function Home() {
-  const page = await fetchPageBySlug("/");
+interface PageProps {
+  params: Promise<{ slug: string[] }>;
+}
+
+export async function generateStaticParams() {
+  const pages = await fetchAllPageSlugs();
+
+  return pages
+    .filter((page) => page.slug?.current && page.slug.current !== "/")
+    .map((page) => ({
+      slug: page.slug.current.split("/").filter(Boolean),
+    }));
+}
+
+export default async function DynamicPage({ params }: PageProps) {
+  const { slug } = await params;
+  const slugPath = slug.join("/");
+  const page = await fetchPageBySlug(slugPath);
 
   if (!page) {
     notFound();
